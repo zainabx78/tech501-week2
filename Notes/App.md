@@ -38,7 +38,14 @@ Download code. Extract the code into the home folder:
 - If you dont specify the name, it will get same name as github repo.
 - `git clone <endpoint for remote repo> repo` 
   - git clones from github into a local repo called `repo`.
-  
+
+1. Upload zip file to my github repo. (Uploading unzipped was not possible- too many files and too large).
+2. Use `git clone https://github.com/zainabx78/tech501-sparta-app repo` in the terminal of azure vm. 
+3. Install the unzip package:
+   1. `Sudo apt install unzip`
+4. `unzip <nodejs app code folder name>`
+
+
 **2nd method:**
   - **cmd**- copy files specified to a location you specify.
     - Going to use private key for this command to gain access to vm through ssh.
@@ -48,7 +55,6 @@ Download code. Extract the code into the home folder:
 Use this command to copy folder containing app folder from local pc to azure vm using my ssh key:
 
 `scp -i ~/.ssh/tech501-zainab-az-key -r /c/Users/zaina/nodejs20-sparta-test-app adminuser@20.254.64.176:/home/adminuser`
-
 
 
   ### Accessing the application:
@@ -64,3 +70,12 @@ Use this command to copy folder containing app folder from local pc to azure vm 
     - Higher rule number is lower priority.
     - Allow port 3000 in inbound rules.
     - Add `:3000` on the end of the google url for the app (Ip address).
+
+
+**Success with method 1:**
+![alt text](<../Images/Screenshot 2025-01-27 153910.png>)
+![alt text](<../Images/Screenshot 2025-01-27 153933.png>)
+
+**Success using method 2:**
+![alt text](<../Images/Screenshot 2025-01-27 162852.png>)
+![alt text](<../Images/Screenshot 2025-01-27 153933.png>)

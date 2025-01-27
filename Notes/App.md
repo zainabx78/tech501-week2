@@ -73,9 +73,38 @@ Use this command to copy folder containing app folder from local pc to azure vm 
 
 
 **Success with method 1:**
+<br>
+
 ![alt text](<../Images/Screenshot 2025-01-27 153910.png>)
 ![alt text](<../Images/Screenshot 2025-01-27 153933.png>)
 
 **Success using method 2:**
+
+<br>
+
 ![alt text](<../Images/Screenshot 2025-01-27 162852.png>)
 ![alt text](<../Images/Screenshot 2025-01-27 153933.png>)
+
+## Creating an Azure Image of VM
+
+- Move the app code from adminuser to root directory. 
+`sudo mv /home/adminuser/repo /`
+- `sudo waagent -deprovision+user` - deletes the home directory (adminuser).
+- In azure portal, stop your vm.
+- From the vm portal, capture into an image.
+- Once image is created, create VM from the image.
+- When VM is created, ssh into it:
+  - `ssh -i ~/.ssh/tech501-zainab-az-key adminuser@20.68.243.130`
+- Enter the root directory (where you moved your app folder into) 
+  - `cd /` 
+  - `cd repo`
+  - `cd app`
+  - `npm start`
+
+Worked- The app folder and node and npm were all ready when I deployed vm from an image. 
+
+![alt text](<../Images/Screenshot 2025-01-27 172930.png>)
+
+<br>
+
+![alt text](<../Images/Screenshot 2025-01-27 172943.png>)

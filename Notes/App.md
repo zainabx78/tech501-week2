@@ -8,32 +8,34 @@
   - Networking- 
     - Security group name=  `tech501-zainab-sparta-app-allow-HTTP-SSH-3000`
 
-### SSH into the VM:
+## SSH into the VM:
   - `ssh -i ssh -i ~/.ssh/tech501-zainab-az-key adminuser@20.254.64.176`
   - `uname --all` - tells you about the image youre running.
 
-### Once SSH into the VM, run these commands:
-  - `sudo apt-get update -y` or `sudo apt update -y` same thing.
+## Once SSH into the VM, run these commands:
+  - `sudo apt-get update -y` or `sudo apt update -y` same thing. 
+    - Safe command- good way to check internet access. Doesn't actually upgrade anything yet!
   - `sudo apt-get upgrade -y`.
     - When purple confirmation screen shows up, **user input still required**- press tab and enter to press ok.
   - `sudo apt install nginx -y`
     - More user input required- press tab and enter.
   - `sudo systemctl status nginx` - check status of nginx.
-  - Dependencies= anything that's required for the application to run. 
+  - **Dependencies**= anything that's required for the application to run. 
   - NodeJS installation-
-    - `sudo DEBIAN_FRONTEND=noninteractive bash -c "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -" && \
-    sudo DEBIAN_FRONTEND=noninteractive 
-    apt-get install -y nodejs`
+  - `sudo DEBIAN_FRONTEND=noninteractive bash -c "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -" && \
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs`
+
+***** Make sure to copy this command from the markdown language terminal not the preview******
   - To check if it's installed:
     - `node -v` and `npm -v`. If you see the versions of these, means it's installed. 
   
 
-  ### To get the code onto the vm:
+## To get the code onto the vm:
 
 Download code. Extract the code into the home folder:
 - `C:\Users\zaina\nodejs20-sparta-test-app`
 
-**1st method:**
+### **1st method:**
 - Git clone command to get code from github repo to local machine.
 - If you dont specify the name, it will get same name as github repo.
 - `git clone <endpoint for remote repo> repo` 
@@ -45,8 +47,9 @@ Download code. Extract the code into the home folder:
    1. `Sudo apt install unzip`
 4. `unzip <nodejs app code folder name>`
 
+*** Another way is to just push code from local repo to github and then clone it into azure vm.
 
-**2nd method:**
+### **2nd method:**
   - **cmd**- copy files specified to a location you specify.
     - Going to use private key for this command to gain access to vm through ssh.
   - `rsync` or `scp`.
@@ -57,7 +60,7 @@ Use this command to copy folder containing app folder from local pc to azure vm 
 `scp -i ~/.ssh/tech501-zainab-az-key -r /c/Users/zaina/nodejs20-sparta-test-app adminuser@20.254.64.176:/home/adminuser`
 
 
-  ### Accessing the application:
+  ## Accessing the application:
 
   - `ls` 
   - `cd repo` 
@@ -72,13 +75,13 @@ Use this command to copy folder containing app folder from local pc to azure vm 
     - Add `:3000` on the end of the google url for the app (Ip address).
 
 
-**Success with method 1:**
+### **Success with method 1:**
 <br>
 
 ![alt text](<../Images/Screenshot 2025-01-27 153910.png>)
 ![alt text](<../Images/Screenshot 2025-01-27 153933.png>)
 
-**Success using method 2:**
+### **Success using method 2:**
 
 <br>
 
@@ -87,6 +90,7 @@ Use this command to copy folder containing app folder from local pc to azure vm 
 
 ## Creating an Azure Image of VM
 
+- IMPORTANT: Won't be able to use the vm that you create the image from again! 
 - Move the app code from adminuser to root directory. 
 `sudo mv /home/adminuser/repo /`
 - `sudo waagent -deprovision+user` - deletes the home directory (adminuser).

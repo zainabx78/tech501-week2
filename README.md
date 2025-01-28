@@ -2,3 +2,4 @@
 
 ## Topics:
 - [App Deployment](Notes/App.md)
+- [Database Deployment](Notes/Database.md)

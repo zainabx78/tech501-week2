@@ -1,3 +1,21 @@
+- [Create a VM](#create-a-vm)
+  - [Dependencies:](#dependencies)
+  - [Installing MongoDB:](#installing-mongodb)
+    - [Change BindIP:](#change-bindip)
+    - [Restart mongodb server after making change:](#restart-mongodb-server-after-making-change)
+- [Connecting the App and database:](#connecting-the-app-and-database)
+  - [SSH into the 2 VM's in different git bash windows:](#ssh-into-the-2-vms-in-different-git-bash-windows)
+  - [In the db VM:](#in-the-db-vm)
+  - [In the App VM:](#in-the-app-vm)
+  - [Connecting the db VM and the app VM: Working in APP VM](#connecting-the-db-vm-and-the-app-vm-working-in-app-vm)
+    - [Setting up an environment variable to use for connecting:](#setting-up-an-environment-variable-to-use-for-connecting)
+      - [Need to be **Working in the App VM:**](#need-to-be-working-in-the-app-vm)
+  - [Create Environment Variable: APP VM](#create-environment-variable-app-vm)
+  - [Creating an image from the DB VM:](#creating-an-image-from-the-db-vm)
+  - [BLOCKERS:](#blockers)
+  - [Levels of automate: Lowest to highest:](#levels-of-automate-lowest-to-highest)
+
+
 # Create a VM
 
 ## Dependencies:
@@ -89,12 +107,11 @@ Enter this:
   - Should be working!
 
 
-## Connecting the db VM and the app VM:
+## Connecting the db VM and the app VM: Working in APP VM
 
 ### Setting up an environment variable to use for connecting:
 
-Need to 
-**Working in the App VM:**
+#### Need to be **Working in the App VM:**
 
 - On the same network so can use private IP. Can use public IP too but not necessary!
 - `10.0.3.4` = db private IP.
@@ -102,7 +119,7 @@ Need to
 Switch into the app folder:
 - `cd /repo/app`
 
-Create Environment Variable:
+## Create Environment Variable: APP VM
 *** Need to do this everytime I restart vm or stop and start it.
 - `export DB_HOST=mongodb://10.0.3.4:27017/posts`
   - Use the private IP of db in this command.
@@ -126,61 +143,8 @@ npm install might not populated db occasionally- may need to manually run a comm
 - Need to be in app folder in app vm. 
 
 
-## Creating a reverse proxy:
-In the app vm:
 
-- nano into this file to edit the path- 
-  - `sudo nano /etc/nginx/sites-available/default`
-- Add this proxy pass into the file in the **location** section:
-  - `proxy_pass http://localhost:3000;`
-  - Make sure to take out the line already under location- 
-    - Take out the line starting with `try_files.`
-  
-Should look like this at this point:
-`location / {
-                # First attempt to serve request as file, then
-                # as directory, then fall back to displaying a 404.
-
-                proxy_pass http://localhost:3000;
-}`
-
-- Restart the nginx app- 
-  - `sudo systemctl restart nginx`
-- Start the app- `npm start`
-- Can also run app with `node app.js`
-- nginx will redirect traffic 
-  - we will no longer need to put 3000 at the end of the link. 
-  - `http://20.39.216.155/` Just the Ip on port 80 will take us to the port 3000 link without specifying :3000.
-
-## Running the app in the background: Using PM2 and &
-1. Using pm2:
-   - Install pm2 on the app vm:
-     - ` sudo npm install -g pm2`
-     - The -g flag means it's installed globally on your system.
-   - Start the pm2 process for your app:
-     - ` pm2 start app.js --name "my-app"`
-   - Check the status of the process:
-     - `pm2 status`
-   - To stop the app:
-     - `pm2 stop "my-app"`
-   - To restart the app:
-     - `pm2 restart "my-app"`
-   - Logs:
-     - `pm2 logs "my-app"`
-2. Using the `&` command:
-    - `npm start &`
-      - Even when you quit the port running terminal, the app will still be running.
-    - `jobs`- to see the background processes running.
-      - Should see the app.
-    - See the job ID:
-      - `jobs -l`
-    - Kill the process:
-      - `kill -15 <jobID>`
-        - The medium level graceful termination.
-    - To restart just run `npm start &` again.
-
-
-## Creating an image from the db VM:
+## Creating an image from the DB VM:
 
 1. First run this command:
 - `sudo waagent -deprovision+user`
@@ -200,7 +164,7 @@ Check if the vm has mongodb installed already:
 
 
 
-# BLOCKERS:
+## BLOCKERS:
 
 When creating the VMs, I configured them to have a security type of `Trusted launch virtual machines` instead of `Standard`
 The issue:
@@ -212,4 +176,19 @@ The issue:
 
 
 Solution= 
-- I re-created the VM's for the app and db again, this time changing the security type to standard. I was able to create images with the `No, capture only a managed image` option this time. 
+- I re-created the VM's for the app and db again, this time changing the security type to standard. 
+  I was able to create images with the `No, capture only a managed image` option this time. 
+  
+**WORKS!**
+
+## Levels of automate: Lowest to highest:
+1. **Manually-** 
+  - SSH into the machine and run the commands manually.
+2. **Bash scripting**- still need to ssh into the vm and then manually run the script. Not fully automatic.
+3. **User data-**
+  - Only runs once (can't start and stop vm).
+  - Runs the script as root user.
+  - No ssh required to run the script it automatically runs on start of vm.
+4. **Image**- has everything you created on disk except home directory (gets wiped).
+
+

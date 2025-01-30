@@ -9,11 +9,13 @@
   - [Accessing the application:](#accessing-the-application)
     - [**Success with method 1:**](#success-with-method-1)
     - [**Success using method 2:**](#success-using-method-2)
-  - [Creating an Azure Image of VM](#creating-an-azure-image-of-vm)
   - [Connecting App VM to Db VM:](#connecting-app-vm-to-db-vm)
   - [Creating a reverse proxy:](#creating-a-reverse-proxy)
   - [Running the app in the background: Using PM2 and \&](#running-the-app-in-the-background-using-pm2-and-)
+  - [Creating an Azure Image of VM](#creating-an-azure-image-of-vm)
   - [Creating a new VM with userdata configured:](#creating-a-new-vm-with-userdata-configured)
+  - [BLOCKERS:](#blockers)
+  - [Troubleshooting-](#troubleshooting-)
 
 
 
@@ -106,23 +108,6 @@ Use this command to copy folder containing app folder from local pc to azure vm 
 ![alt text](<../Images/Screenshot 2025-01-27 162852.png>)
 ![alt text](<../Images/Screenshot 2025-01-27 153933.png>)
 
-## Creating an Azure Image of VM
-
-- IMPORTANT: Won't be able to use the vm that you create the image from again! 
-- Move the app code from adminuser to root directory. 
-`sudo mv /home/adminuser/repo /`
-- `sudo waagent -deprovision+user` - deletes the home directory (adminuser).
-- In azure portal, stop your vm.
-- From the vm portal, capture into an image.
-- Once image is created, create VM from the image.
-- When VM is created, ssh into it:
-  - `ssh -i ~/.ssh/tech501-zainab-az-key adminuser@20.68.243.130`
-- Enter the root directory (where you moved your app folder into) 
-  - `cd /` 
-  - `cd repo`
-  - `cd app`
-  - `npm start`
-
 
 ## Connecting App VM to Db VM:
 
@@ -155,7 +140,7 @@ In the app vm:
     - Take out the line starting with `try_files.`
   
 Should look like this at this point:
-```
+```bash
 location / {
                 # First attempt to serve request as file, then
                 # as directory, then fall back to displaying a 404.
@@ -177,6 +162,7 @@ location / {
    - Install pm2 on the app vm:
      - ` sudo npm install -g pm2`
      - The -g flag means it's installed globally on your system.
+     - Available to all users.
    - Start the pm2 process for your app:
      - ` pm2 start app.js --name "my-app"`
    - Check the status of the process:
@@ -199,6 +185,22 @@ location / {
         - The medium level graceful termination.
     - To restart just run `npm start &` again.
 
+## Creating an Azure Image of VM
+
+- IMPORTANT: Won't be able to use the vm that you create the image from again! 
+1. Move the app code from adminuser to root directory. 
+`sudo mv /home/adminuser/repo /`
+2. `sudo waagent -deprovision+user` - deletes the home directory (adminuser).
+3. In azure portal, stop your vm.
+4. From the vm portal, capture into an image.
+5. Once image is created, create VM from the image.
+6. When VM is created, ssh into it:
+  - `ssh -i ~/.ssh/tech501-zainab-az-key adminuser@20.68.243.130`
+7. Enter the root directory (where you moved your app folder into) 
+  - `cd /` 
+  - `cd repo`
+  - `cd app`
+  - `npm start`
 
 ## Creating a new VM with userdata configured:
 - Use VM image to create a new vm. 
@@ -215,4 +217,27 @@ location / {
     ````
   - Create the vm and check if it works by just pasting publicIP into the browser.
   - Use /posts at the end of the browser link.
-  ![alt text](<Screenshot 2025-01-29 150015.png>)
+![alt text](<../Images/Screenshot 2025-01-29 150015.png>)
+
+
+## BLOCKERS:
+
+When creating the VMs, I configured them to have a security type of `Trusted launch virtual machines` instead of `Standard`
+The issue:
+- When creating the images from these VMs, I was unable to pick the `No, capture only a managed image` option. I was forced to pick the `Yes, share it to a gallery as a VM image version.` option instead.
+![alt text](<../Images/Screenshot 2025-01-28 175826.png>)
+
+![alt text](<../Images/Screenshot 2025-01-28 175858.png>)
+
+
+## Troubleshooting- 
+- If posts page not working, make sure there aren't any processes running in the background:
+- `ps aux` to check any extra pm2 or node processes.
+- `kill` the processes gracefully.
+- Then try the `pm2 start app.js` command again. 
+- Running app with pm2 with sudo:
+  - `sudo -E pm2 start app.js`
+    - need the -E flag to make sure sudo can access the environment variables. 
+    - Only need sudo -E if you dont have permissions over that folder.
+
+App- isn't a system service so we cannot enable it like the mongodb server.

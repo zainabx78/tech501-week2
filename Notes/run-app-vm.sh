@@ -27,6 +27,11 @@ unzip nodejs20-sparta-test-app.zip
 #Installing pm2
 sudo npm install -g pm2
 
+# Changing the bindIP:
+cd app
+echo "Configuring MongoDB to bind to all IP addresses..."
+sudo sed -i 's/^ *bindIp: 127.0.0.1/bindIp: 0.0.0.0/' /etc/mongod.conf
+
 # Accessing application
 cd app
 npm install

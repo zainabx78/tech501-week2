@@ -1,3 +1,8 @@
+How to deploy an app with high availability and scalability:
+- Using a VMSS
+- Spreading VM's accross 3 zones.
+- Minimum of 2 VMs.
+
 # Creating a monitoring and alerts dashboard
 
 - Go to the overview page of vm.
@@ -11,7 +16,7 @@
    - Shared type
    - Name:tech501-zainab-shared-app-dashboard
    - Click create and pin.
-3. Add the network total metric and the disk operations to the dashboard you just created.
+1. Add the network total metric and the disk operations to the dashboard you just created.
 
 To view the dashboard:
 1. Go to `Dashboard hub`.
@@ -27,7 +32,7 @@ If you click on the metric, can change the time frame and then click save to das
 - `ab -n 1000 -c 100 http://yourwebsite.com/`
 - `ab -n 1000 -c 100 http://172.187.145.27/`
 
-
+Increases CPU usage by sending load to the application- doesn't represent a real application.
 
 
 # Auto Scaling
@@ -37,17 +42,18 @@ If you click on the metric, can change the time frame and then click save to das
 Worst to better: When CPU load is too high
 1. Fall over (worst option)
 2. dashbord
-3. alert
+3. alert- e.g. alarms going off at 3.5% cpu usage.
+   - for testing purposes. Generally it's 40%.
 4. autoscaling (best option)
 
 ### Types of scaling:
-1. - Horizontal scaling (in or out) (more instances).
+1. Horizontal scaling (in or out) (more instances).
 2. Vertical scaling (up or down) (more CPU, RAM etc).
 
 ### Azure Virtual machine scale sets (VMSS)
 
 - Same as aws autoscaling group
-- High availability and scalability.
+- **High availability and scalability** and making application reliable!
 - Custom autoscale:
   - When CPU exceeds 75%
   - Start with 2 VMs:
@@ -80,9 +86,11 @@ Worst to better: When CPU load is too high
 - SSH key- select existing key on azure- select your own key.
 - OS disk type- Standard SSD
 - PublicIp: Disabled (don't need one because we will access VM through load balancer).
+- Frontend port range start: 50000 (ssh to port 50000 to reach first vm, incrementing by one for the next etc)
+- Backend port: 22
 - Load Balancer: Create a new load balancer
     - Name: tech501-zainab-app-lb
-    - Need to connect to our VM's through port 5000 upwards e.g. 1st VM SSH will be through port 5000, - 2nd through 5001 etc.
+    - Need to connect to our VM's through port 50000 upwards e.g. 1st VM SSH will be through port 50000, - 2nd through 50001 etc.
 - Enable health monitoring.
 - Enable automatic repairs.
 - Enable User data and paste in the script:
@@ -92,8 +100,6 @@ cd /repo/app
 pm2 start app.js
 
 ```
-
-
 ![alt text](../Images/Diagram.png)
 
 
@@ -101,6 +107,8 @@ pm2 start app.js
 - Enter public IP of the VMSS into the browser- should show app page.
   - Might take a few mins.
 - **When you restart vm** (stop and start vm), need to reimage atleast 1 vm for the app to work. 
+  - This is because the image user data for the vm only runs the first time and the app won't start up everytime after that.
+  - Reimaging means the userdata runs again from scratch and the vm is replaced.
 
 Health status is only healthy or unhealthy if the vm is running. Blank if not running.
 

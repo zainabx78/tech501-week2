@@ -39,6 +39,22 @@ STEPS:
 
 
 # PLAN
+
+When web traffic comes in, hits the public IP of the Public subnet.
+Because of our network security group (NSG)- port 80 allowed, the traffic will be allowed in.
+The traffic hits the app vm.
+Because of the export command (env variables)- the app vm knows it has to send the request to the db- private IP on the mongodb port.
+Associate the route table with the public subnet (where the traffic comes from)- monitoring that traffic.
+We have to force a different route to happen- Route table.
+- If there are packets with destination of private subnet, next hop has to be NVA! It's not all traffic just the one going to private subnet. (Has to meet condition).
+- Any traffic headed for the private subnet will have to enter the DMZ (NVA) subnet first through the dmz private IP.
+Once the packets reach NVA, the NVA inspects the packets.
+- Ip forwarding enabled so the packets have to go through the rules (iptables). 
+- Fowards traffic to the db machine (mongodb traffic was allowed in db nsg).
+Db can send the info requested back to the app vm (no nva forced on the way back).
+
+
+
 ## VNET
 - 10.0.0.0/16 CIDR block.
   
@@ -100,6 +116,7 @@ NEW SUBNET: DMZ-subnet
 - Subnet: Private subnet
 - ** No public Ip address.**
 - Allow only SSH port access.
+- Because it's in a private subnet with no public IP, had to use an image which already had mongodb installed!
 
 ## Creating an app VM from the app image:
 - Name: tech501-zainab-in-3-subnet-sparta-app-vm
@@ -128,6 +145,9 @@ pm2 start app.js
 - `ping 10.0.4.4`
 
 ![alt text](<../Images/Screenshot 2025-01-31 161951.png>)
+
+At this point the ping should work! 
+- No rules to stop it yet. 
 
 ## Create NVA:
 - Create a VM: without image.
@@ -165,6 +185,7 @@ pm2 start app.js
 ## Enabling IP forwarding in azure:
 - NVA VM
 - Network settings
+  - Click on the network interface.
 - Ip configuration on the left
   - Check the box that says `Enable Ip forwarding`.
   - Apply changes.
@@ -202,27 +223,28 @@ These rules restrict the traffic so only the right traffic from the app VM is ge
 
 Creating a bash script to automate this:
 - ` nano config-ip-tables.sh`
-```
+```bash
 #!/bin/bash
  
 # configure iptables
- 
+# This setup protects your system by only allowing necessary connections while blocking everything else. 
+
 echo "Configuring iptables..."
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Allows all traffic on the loopback interface (lo), enabling communication within the local machine. Allows the computer to talk to itself (for example, when programs communicate internally).
 sudo iptables -A INPUT -i lo -j ACCEPT
 sudo iptables -A OUTPUT -o lo -j ACCEPT
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Allows incoming traffic that is part of an existing connection or related to an already established one. Allows responses to requests you already made (like when you visit a website, the replies from the website can come back).
 sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Lets your computer reply to connections that have already been established.
 sudo iptables -A OUTPUT -m state --state ESTABLISHED -j ACCEPT
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Blocks weird or broken connections that shouldn't exist (could be attacks or errors).
 sudo iptables -A INPUT -m state --state INVALID -j DROP
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Allows SSH connections (so you can remotely access this machine via SSH on port 22).
 sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
 sudo iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
  
@@ -236,16 +258,16 @@ sudo iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
 #sudo iptables -A OUTPUT -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 #sudo iptables -A INPUT -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED -j ACCEPT
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Allows one network (10.0.2.x) to talk to another (10.0.4.x) on port 27017 (MongoDB database).
 sudo iptables -A FORWARD -p tcp -s 10.0.2.0/24 -d 10.0.4.0/24 --destination-port 27017 -m tcp -j ACCEPT
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Allows pinging (so one network can check if another is reachable).
 sudo iptables -A FORWARD -p icmp -s 10.0.2.0/24 -d 10.0.4.0/24 -m state --state NEW,ESTABLISHED -j ACCEPT
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Blocks all incoming traffic unless you’ve explicitly allowed it (extra security).
 sudo iptables -P INPUT DROP
  
-# ADD COMMENT ABOUT WHAT THE FOLLOWING COMMAND(S) DO
+# Blocks all forwarded traffic unless allowed (prevents unwanted network forwarding).
 sudo iptables -P FORWARD DROP
  
 echo "Done!"
@@ -253,11 +275,13 @@ echo ""
  
 # make iptables rules persistent
 # it will ask for user input by default
- 
+# Saves these firewall rules so they don’t reset after a reboot.
 echo "Make iptables rules persistent..."
 sudo DEBIAN_FRONTEND=noninteractive apt install iptables-persistent -y
 echo "Done!"
 echo ""
+
+
 ```
 - Change permissions of the file:
   - `chmod +x config-ip-tables.sh`
@@ -265,6 +289,7 @@ echo ""
 - Run the script:
   - `./config-ip-tables.sh`
   
+
 
 ## Edit DB NSG to make it more secure:
 ### Allow mongodb:

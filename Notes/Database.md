@@ -74,6 +74,7 @@ Enter this:
 - Change the bind IP to 0.0.0.0
 - 0.0.0.0 means it's accessible from anywhere.
 - Don't do this for production.
+- The default bind IP only allows local host to access the db (the db's own vm).
 
 ### Restart mongodb server after making change:
 

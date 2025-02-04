@@ -117,7 +117,7 @@ Health status is only healthy or unhealthy if the vm is running. Blank if not ru
 - No public Ip and can't go through private Ip (not in the same vnet) so have to go in through the load balancer.
 - So use load balancer IP.
 - `ssh -i ~/.ssh/tech501-zainab-az-key -p 50000 adminuser@85.210.45.236`
-  - `-p 5000` specifies the port that we use to SSH into the vm- specified in the vmss settings.
+  - `-p 50000` specifies the port that we use to SSH into the vm- specified in the vmss settings.
 
 ### Deleting the VMSS:
 - Go to VMSS- Delete option at the top.

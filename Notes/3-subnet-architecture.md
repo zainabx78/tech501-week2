@@ -221,6 +221,8 @@ When setting Iptables rules up, if set up in the wrong order, may lock yourself 
 
 These rules restrict the traffic so only the right traffic from the app VM is getting into the db VM.
 
+Iptables - Blocks unauthorized access at the VM level- acts as a filter fpr the traffic.
+
 Creating a bash script to automate this:
 - ` nano config-ip-tables.sh`
 ```bash

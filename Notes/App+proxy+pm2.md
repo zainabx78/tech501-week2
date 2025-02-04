@@ -169,6 +169,7 @@ location / {
      - `pm2 status`
    - To stop the app:
      - `pm2 stop "my-app"`
+     - `pm2 delete`
    - To restart the app:
      - `pm2 restart "my-app"`
    - Logs:

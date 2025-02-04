@@ -30,10 +30,22 @@ If you click on the metric, can change the time frame and then click save to das
 ## Installing Apache Bench (load testing)
 - `sudo apt-get install apache2-utils`
 - `ab -n 1000 -c 100 http://yourwebsite.com/`
-- `ab -n 1000 -c 100 http://172.187.145.27/`
+- `ab -n 1000 -c 100 http://4.234.1.191/`
 
 Increases CPU usage by sending load to the application- doesn't represent a real application.
 
+## Alerts
+
+- Go to Alerts in azure console.
+- Or go to the vm monitoring section. 
+- Create alert group (action group).
+- Email alert notifications. 
+- Change CPU metrics- CPU greater than 30.
+- Critical 
+
+![alt text](<../Images/Screenshot 2025-02-04 171123.png>)
+![alt text](<../Images/Screenshot 2025-02-04 171109.png>)
+![alt text](<../Images/Screenshot 2025-02-04 171147.png>)
 
 # Auto Scaling
 

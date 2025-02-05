@@ -8,3 +8,4 @@
 - [Bash-script-db](Notes/run-db-vm.sh)
 - [Autoscaling and Load Balancer](Notes/VMSS.md)
 - [3 Subnet Architecture (NVA)](Notes/3-subnet-architecture.md)
+- [Monitoring and alerts](Notes/Monitoring-and-alerts.md)
